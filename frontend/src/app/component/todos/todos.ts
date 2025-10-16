@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Todo } from '../../models/Todo';
 import { TodoService } from '../../services/todo.service';
+import { ChangeDetectorRef } from '@angular/core';
 @Component({
   selector: 'app-todos',
   standalone: false,
@@ -14,7 +15,7 @@ export class Todos implements OnInit{
   inputTodo: string = '';
 
 
-  constructor(private todoService: TodoService) { }  
+  constructor(private todoService: TodoService,private cd :ChangeDetectorRef) { }  
   ngOnInit(): void { 
       // Carga las tareas desde el backend al iniciar
     this.loadTodos();
@@ -51,13 +52,15 @@ export class Todos implements OnInit{
 
   // Agregar nueva tarea
   addTodo(): void {
-  const TodoTexto = this.inputTodo.trim();
-  if (!TodoTexto) return;
+  const todoTexto = this.inputTodo.trim();
+  if (!todoTexto) return;
 
-  this.todoService.addTodo(TodoTexto).subscribe({
-    next: (createdTodo: Todo) => {
-      this.todos = [...this.todos, createdTodo]; // actualizar UI
-      this.inputTodo = ''; // limpiar input
+  this.todoService.addTodo(todoTexto).subscribe({
+    next: (createdTodo) => {
+      // Actualiza la lista inmediatamente
+      this.todos = [...this.todos, createdTodo];
+      this.inputTodo = ''; // Limpia el input
+      this.cd.detectChanges(); // Asegura que la UI se actualice
     },
     error: (err) => console.error('Error agregando tarea:', err)
   });
